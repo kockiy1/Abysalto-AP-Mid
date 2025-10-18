@@ -1,4 +1,6 @@
 ﻿using AbySalto.Mid.Application.Mappings;
+using AbySalto.Mid.Application.Services;
+using AbySalto.Mid.Application.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AbySalto.Mid.Application;
@@ -10,7 +12,10 @@ public static class DependencyInjection
         // Register AutoMapper with all profiles
         services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
-        // TODO: Add application services
+        // Register application services
+        services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IBasketService, BasketService>();
+        services.AddScoped<IFavoriteProductService, FavoriteProductService>();
 
         return services;
     }
