@@ -1,5 +1,7 @@
 ﻿using AbySalto.Mid.Domain.Entities;
+using AbySalto.Mid.Domain.Interfaces;
 using AbySalto.Mid.Infrastructure.Data;
+using AbySalto.Mid.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -63,7 +65,15 @@ public static class DependencyInjection
 
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
-        // TODO: Add repositories, Unit of Work, external API services, caching
+        // Register repositories
+        services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IBasketRepository, BasketRepository>();
+        services.AddScoped<IFavoriteProductRepository, FavoriteProductRepository>();
+
+        // Register Unit of Work
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        // TODO: Add external API services, caching
 
         return services;
     }
