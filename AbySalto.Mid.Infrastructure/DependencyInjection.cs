@@ -1,11 +1,16 @@
-﻿using AbySalto.Mid.Domain.Entities;
+﻿using System.Text;
+using AbySalto.Mid.Application.Services.Interfaces;
+using AbySalto.Mid.Domain.Entities;
 using AbySalto.Mid.Domain.Interfaces;
+using AbySalto.Mid.Infrastructure.Authentication;
 using AbySalto.Mid.Infrastructure.Data;
 using AbySalto.Mid.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AbySalto.Mid.Infrastructure;
 
@@ -16,6 +21,7 @@ public static class DependencyInjection
         services
             .AddDatabase(configuration)
             .AddIdentityServices()
+            .AddAuthenticationServices(configuration)
             .AddServices();
 
         return services;
@@ -59,6 +65,40 @@ public static class DependencyInjection
         })
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
+
+        return services;
+    }
+
+    private static IServiceCollection AddAuthenticationServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Bind JwtSettings from appsettings.json
+        var jwtSettings = new JwtSettings();
+        configuration.Bind(JwtSettings.SectionName, jwtSettings);
+        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+
+        // Register JwtTokenGenerator
+        services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
+
+        // Configure JWT Authentication
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwtSettings.Issuer,
+                ValidAudience = jwtSettings.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
+            };
+        });
 
         return services;
     }

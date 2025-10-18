@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
@@ -26,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AbySalto.Mid.Domain\AbySalto.Mid.Domain.csproj" />
+    <ProjectReference Include="..\AbySalto.Mid.Application\AbySalto.Mid.Application.csproj" />
   </ItemGroup>
 
 </Project>
