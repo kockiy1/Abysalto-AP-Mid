@@ -1,5 +1,6 @@
 using AbySalto.Mid.Application.DTOs.Product;
 using AbySalto.Mid.Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AbySalto.Mid.Controllers;
@@ -12,10 +13,12 @@ namespace AbySalto.Mid.Controllers;
 public class ProductController : ControllerBase
 {
     private readonly IProductService _productService;
+    private readonly IDummyJsonService _dummyJsonService;
 
-    public ProductController(IProductService productService)
+    public ProductController(IProductService productService, IDummyJsonService dummyJsonService)
     {
         _productService = productService;
+        _dummyJsonService = dummyJsonService;
     }
 
     /// <summary>
@@ -74,5 +77,28 @@ public class ProductController : ControllerBase
     {
         var products = await _productService.GetProductsByCategoryAsync(category);
         return Ok(products);
+    }
+
+    /// <summary>
+    /// Synchronizes products from DummyJSON API to the database
+    /// </summary>
+    /// <param name="limit">Maximum number of products to fetch (default: 100)</param>
+    /// <returns>Number of products successfully synced</returns>
+    [Authorize]
+    [HttpPost("sync")]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> SyncProducts([FromQuery] int limit = 100)
+    {
+        try
+        {
+            var syncedCount = await _dummyJsonService.SyncProductsAsync(limit);
+            return Ok(new { message = $"Successfully synced {syncedCount} products from DummyJSON API.", syncedCount });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
+        }
     }
 }

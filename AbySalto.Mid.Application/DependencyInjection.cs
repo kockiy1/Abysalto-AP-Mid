@@ -18,6 +18,9 @@ public static class DependencyInjection
         services.AddScoped<IFavoriteProductService, FavoriteProductService>();
         services.AddScoped<IAuthService, AuthService>();
 
+        // Register DummyJsonService with HttpClient
+        services.AddHttpClient<IDummyJsonService, DummyJsonService>();
+
         return services;
     }
 }
