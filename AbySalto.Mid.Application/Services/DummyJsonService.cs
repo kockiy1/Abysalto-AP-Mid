@@ -82,11 +82,9 @@ public class DummyJsonService : IDummyJsonService
             // Save all changes to database
             await _unitOfWork.SaveChangesAsync();
 
-            // Invalidate product cache after successful sync
-            if (syncedCount > 0)
-            {
-                _cache.Remove(AllProductsCacheKey);
-            }
+            // Always invalidate product cache after sync operation
+            // This ensures cache is refreshed even if no new products were added
+            _cache.Remove(AllProductsCacheKey);
 
             return syncedCount;
         }

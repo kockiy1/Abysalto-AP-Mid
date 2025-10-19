@@ -27,7 +27,8 @@ public interface IFavoriteProductService
     /// </summary>
     /// <param name="userId">User ID</param>
     /// <param name="productId">Product ID to add</param>
-    Task AddToFavoritesAsync(string userId, int productId);
+    /// <returns>The added favorite product details</returns>
+    Task<FavoriteProductDto> AddToFavoritesAsync(string userId, int productId);
 
     /// <summary>
     /// Removes a product from user's favorites

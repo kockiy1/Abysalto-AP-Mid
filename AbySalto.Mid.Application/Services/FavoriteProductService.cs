@@ -39,7 +39,7 @@ public class FavoriteProductService : IFavoriteProductService
     /// <summary>
     /// Adds a product to user's favorites
     /// </summary>
-    public async Task AddToFavoritesAsync(string userId, int productId)
+    public async Task<FavoriteProductDto> AddToFavoritesAsync(string userId, int productId)
     {
         // Validate product exists
         var product = await _unitOfWork.Products.GetByIdAsync(productId);
@@ -50,15 +50,22 @@ public class FavoriteProductService : IFavoriteProductService
 
         // Check if already favorite
         var isFavorite = await _unitOfWork.FavoriteProducts.IsFavoriteAsync(userId, productId);
-        if (isFavorite)
+        if (!isFavorite)
         {
-            // Already in favorites, do nothing
-            return;
+            // Add to favorites
+            await _unitOfWork.FavoriteProducts.AddFavoriteAsync(userId, productId);
+            await _unitOfWork.SaveChangesAsync();
         }
 
-        // Add to favorites
-        await _unitOfWork.FavoriteProducts.AddFavoriteAsync(userId, productId);
-        await _unitOfWork.SaveChangesAsync();
+        // Return favorite details (create DTO from product entity)
+        return new FavoriteProductDto
+        {
+            ProductId = product.Id,
+            ProductTitle = product.Title,
+            ProductThumbnail = product.Thumbnail,
+            ProductPrice = product.Price,
+            AddedAt = DateTime.UtcNow
+        };
     }
 
     /// <summary>

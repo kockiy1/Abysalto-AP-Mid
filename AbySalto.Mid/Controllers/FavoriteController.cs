@@ -66,12 +66,12 @@ public class FavoriteController : ControllerBase
     /// Adds a product to user's favorites
     /// </summary>
     /// <param name="productId">Product ID to add</param>
-    /// <returns>No content</returns>
+    /// <returns>The added favorite product details</returns>
     [HttpPost("{productId}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(FavoriteProductDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> AddToFavorites(int productId)
+    public async Task<ActionResult<FavoriteProductDto>> AddToFavorites(int productId)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -82,8 +82,8 @@ public class FavoriteController : ControllerBase
 
         try
         {
-            await _favoriteProductService.AddToFavoritesAsync(userId, productId);
-            return NoContent();
+            var favorite = await _favoriteProductService.AddToFavoritesAsync(userId, productId);
+            return Ok(favorite);
         }
         catch (InvalidOperationException ex)
         {
