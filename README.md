@@ -152,3 +152,7 @@ The project follows **Clean Architecture** principles:
 Edit `appsettings.json` or `appsettings.Development.json` to configure:
 - Database connection string (SQLite)
 - JWT settings (secret key, issuer, audience, expiration)
+
+## Security Note
+⚠️ The JWT secret key in appsettings.json is for development/testing purposes only. 
+In production, use environment variables or secure key management services.
