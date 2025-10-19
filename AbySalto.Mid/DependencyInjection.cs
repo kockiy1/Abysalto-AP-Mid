@@ -8,6 +8,10 @@ public static class DependencyInjection
     {
         services.AddControllers();
         services.AddEndpointsApiExplorer();
+
+        // Add Memory Cache for performance optimization
+        services.AddMemoryCache();
+
         services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "AbySalto Mid API", Version = "v1" });

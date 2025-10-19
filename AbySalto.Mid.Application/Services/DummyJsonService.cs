@@ -3,6 +3,7 @@ using AbySalto.Mid.Application.DTOs;
 using AbySalto.Mid.Application.Services.Interfaces;
 using AbySalto.Mid.Domain.Entities;
 using AbySalto.Mid.Domain.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace AbySalto.Mid.Application.Services;
 
@@ -13,13 +14,16 @@ public class DummyJsonService : IDummyJsonService
 {
     private readonly HttpClient _httpClient;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IMemoryCache _cache;
     private const string BaseUrl = "https://dummyjson.com";
+    private const string AllProductsCacheKey = "products_all";
 
-    public DummyJsonService(HttpClient httpClient, IUnitOfWork unitOfWork)
+    public DummyJsonService(HttpClient httpClient, IUnitOfWork unitOfWork, IMemoryCache cache)
     {
         _httpClient = httpClient;
         _httpClient.BaseAddress = new Uri(BaseUrl);
         _unitOfWork = unitOfWork;
+        _cache = cache;
     }
 
     /// <summary>
@@ -77,6 +81,12 @@ public class DummyJsonService : IDummyJsonService
 
             // Save all changes to database
             await _unitOfWork.SaveChangesAsync();
+
+            // Invalidate product cache after successful sync
+            if (syncedCount > 0)
+            {
+                _cache.Remove(AllProductsCacheKey);
+            }
 
             return syncedCount;
         }

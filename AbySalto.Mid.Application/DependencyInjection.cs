@@ -13,7 +13,16 @@ public static class DependencyInjection
         services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
         // Register application services
-        services.AddScoped<IProductService, ProductService>();
+        // Register base ProductService
+        services.AddScoped<ProductService>();
+        // Register cached decorator for IProductService
+        services.AddScoped<IProductService>(provider =>
+        {
+            var productService = provider.GetRequiredService<ProductService>();
+            var memoryCache = provider.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
+            return new CachedProductService(productService, memoryCache);
+        });
+
         services.AddScoped<IBasketService, BasketService>();
         services.AddScoped<IFavoriteProductService, FavoriteProductService>();
         services.AddScoped<IAuthService, AuthService>();
